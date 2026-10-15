@@ -3,13 +3,15 @@ package jantarFilosofos;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import enums.Parametros;
+
 public class Filosofo extends Thread {
 	private final int id; // id vai ser a posição no array
 	private final Garfo garfoEsquerda;
 	private final Garfo garfoDireita;
 
-	final static int TEMPO_MAXIMO = 1000; // usado para definir intervalos de ms, pode ser um global no main
-	final static int INANICAO = 20; // tentativas de comer antes de escrever um aviso
+	final int TEMPO_MAXIMO = Parametros.TEMPO_MAXIMO.getValor(); // usado para definir intervalos de ms
+	final int INANICAO = Parametros.INANICAO.getValor(); // tentativas de comer antes de escrever um aviso
 	private Random random = new Random();
 
 	// contadores para exibir no main
@@ -102,16 +104,18 @@ public class Filosofo extends Thread {
 
 		try {
 			while (!Thread.currentThread().isInterrupted()) {
+				System.out.println("Filosofo " + id + "esta PENSANDO.");
 				pensar();
 
 				if (pegaGarfos()) {
 					tentativasFalhas = 0; // reseta as tentativas apos pegarf os garfos
-					comer();
+					System.out.println("Filosofo " + id + "esta COMENDO.");
+					comer();					
 					soltaGarfos();
 				} else {
 					tentativasFalhas++;
 					if (tentativasFalhas >= INANICAO) {
-						System.out.println("Filosofo " + id + " esta morrendo de inanicao!");
+						System.out.println("Filosofo " + id + " esta morrendo de INANICAO!");
 						tentativasFalhas = 0; // resetas as tentativas
 					}
 				}
