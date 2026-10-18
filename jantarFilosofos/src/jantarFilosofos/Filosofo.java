@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import enums.Parametros;
 
 public class Filosofo extends Thread {
+	
 	private final int id; // id vai ser a posição no array
 	private final Garfo garfoEsquerda;
 	private final Garfo garfoDireita;
@@ -20,6 +21,8 @@ public class Filosofo extends Thread {
 	// contadores para exibir no main
 	public AtomicInteger refeicoes = new AtomicInteger(0);
 	public AtomicInteger pensamentos = new AtomicInteger(0);
+	public AtomicInteger falhasComer = new AtomicInteger(0);
+
 
 	public Filosofo(int id, Garfo garfoEsquerda, Garfo garfoDireita, Semaphore garcom) {
 		this.id = id;
@@ -57,13 +60,13 @@ public class Filosofo extends Thread {
 	}
 
 	private void pensar() throws InterruptedException {
-		pensamentos.incrementAndGet();
 		Thread.sleep(tempo(TEMPO_MAXIMO));
+		pensamentos.incrementAndGet();
 	}
 
 	private void comer() throws InterruptedException {
-		refeicoes.incrementAndGet();
 		Thread.sleep(tempo(TEMPO_MAXIMO));
+		refeicoes.incrementAndGet();
 	}
 
 	private boolean pegaGarfos() throws InterruptedException {
@@ -73,7 +76,7 @@ public class Filosofo extends Thread {
 		if (comecaPelaEquerda) {
 
 			garfoEsquerda = pegaGarfoEsquerda();
-
+			
 			if (garfoEsquerda) {
 				garfoDireita = pegaGarfoDireita();
 
@@ -100,10 +103,12 @@ public class Filosofo extends Thread {
 			return false;
 		}
 	}
+	
 
 	@Override
 	public void run() {
 		int tentativasFalhas = 0;
+		
 
 		try {
 			while (!Thread.currentThread().isInterrupted()) {
@@ -117,13 +122,16 @@ public class Filosofo extends Thread {
 					if (pegaGarfos()) {
 						tentativasFalhas = 0; // reseta as tentativas apos pegar os garfos
 						System.out.println("Filosofo " + id + " esta COMENDO.");
+						
 						try {
 							comer();
-						} finally {
+						} finally {							
 							soltaGarfos(); // sempre devolve os garfos, mesmo se interrompido comendo
 						}
 					} else {
 						tentativasFalhas++;
+						falhasComer.incrementAndGet();
+						System.out.println("Filosofo " + id + " NÂO conseguiu COMER\n");
 						if (tentativasFalhas >= INANICAO) {
 							System.out.println("Filosofo " + id + " esta morrendo de INANICAO!");
 							tentativasFalhas = 0; // reseta as tentativas
